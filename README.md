@@ -22,5 +22,22 @@ These instructions will help you get a copy of the project up and running on you
    git clone git@github.com:EkoEdyPurwanto/mnc_bank.git
    ```
 
+2. change into the project directory:
+   ```bash
+   cd mnc_bank
+   ```
+
+3. Install the project dependencies:
+   ```bash
+   go mod download && go mod tidy
+   ```
+
+4. Change to the app directory and run the main.go file:
+   ```bash
+   go run main.go
+   ```
+   
+5. Open the run.http file to try the API that has been created
+
 ### Acknowledgments
 [echo labstack](), [validator](), [google uuid](), [jwt]()

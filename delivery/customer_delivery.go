@@ -61,6 +61,6 @@ func (c *CustomerDelivery) loginHandler(ctx echo.Context) error {
 }
 
 func (c *CustomerDelivery) logoutHandler(ctx echo.Context) error {
-	//TODO implement logout logic
-	return ctx.JSON(http.StatusOK, "Logout successful")
+	// Implement payment logic here
+	panic("implement me")
 }

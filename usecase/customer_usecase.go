@@ -139,13 +139,14 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 		return "", err
 	}
 
+	// Save the token data to the JSON file yang sudah terbuat tadi,
+
 	return token, nil
 }
 
 func (uc *customerUseCase) Logout() error {
-	// Implement logout logic here
-
-	return nil
+	// Implement payment logic here
+	panic("implement me")
 }
 
 func (uc *customerUseCase) Payment() error {
