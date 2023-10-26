@@ -1,0 +1,25 @@
+### Register
+POST http://localhost:1323/api/v1/auth/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "user",
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+
+### Login
+POST http://localhost:1323/api/v1/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "Identifier": {
+    "UserName": "testuser",
+    "Email": "test@example.com",
+    "PhoneNumber": "1234567890"
+  },
+  "Password": "password123"
+}

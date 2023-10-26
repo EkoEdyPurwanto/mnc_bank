@@ -1,0 +1,9 @@
+{
+  "merchants": [
+    {
+      "id": 1,
+      "name": "mnc bank",
+      "email": "mncbank@example.com"
+    }
+  ]
+}
