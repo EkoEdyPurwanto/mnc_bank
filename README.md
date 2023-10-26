@@ -13,11 +13,11 @@ These instructions will help you get a copy of the project up and running on you
 ### Installation
 
 1. Clone the repository to your local machine with HTTP or SSH:
-   ### Using HTTP
+   ###### Using HTTP
    ```bash
    git clone https://github.com/EkoEdyPurwanto/mnc_bank.git
    ```
-   ### Using SSH
+   ###### Using SSH
    ```bash
    git clone git@github.com:EkoEdyPurwanto/mnc_bank.git
    ```
