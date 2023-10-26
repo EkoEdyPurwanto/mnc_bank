@@ -1,34 +1,16 @@
 {
   "customers": [
     {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
-      "password": "password123"
-    },
-    {
-      "id": 2,
-      "name": "Jane Smith",
-      "email": "jane@example.com",
-      "password": "password456"
-    },
-    {
-      "id": 3,
+      "id": "c514c8bb-0bab-425a-8683-74a92b3f45f5",
       "name": "user",
-      "email": "user1@example.com",
-      "password": "password123"
+      "email": "user@example.com",
+      "password": "$2a$10$vT6BTJb1PWXI4FtnEtE3uubHWzB5A3ECVFtPORsPdjuIb6B0KL4ee"
     },
     {
-      "id": 4,
+      "id": "d396f501-1234-458c-938e-132f9125b711",
       "name": "user",
       "email": "user2@example.com",
-      "password": "password123"
-    },
-    {
-      "id": 5,
-      "name": "user",
-      "email": "user4@example.com",
-      "password": "password123"
+      "password": "$2a$10$opRXYqxrcs/h4gjcSxDOSuooQDRRPXpa0k9FV6au4e9sHs8Zrhl3q"
     }
   ]
 }

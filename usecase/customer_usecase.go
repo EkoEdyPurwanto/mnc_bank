@@ -2,14 +2,19 @@ package usecase
 
 import (
 	"EkoEdyPurwanto/mnc-bank/model"
+	"EkoEdyPurwanto/mnc-bank/model/req"
+	"EkoEdyPurwanto/mnc-bank/utils/common"
+	"EkoEdyPurwanto/mnc-bank/utils/security"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"github.com/go-playground/validator/v10"
+	"os"
 )
 
 type CustomerUseCase interface {
-	Register(name, email, password string) error
-	Login(email, password string) error
+	Register(payload req.RegisterRequest) error
+	Login(payload req.LoginRequest) (string, error)
 	Logout() error
 	Payment() error
 }
@@ -20,7 +25,7 @@ type customerUseCase struct {
 }
 
 func NewCustomerUseCase(dataFilePath string) (CustomerUseCase, error) {
-	data, err := ioutil.ReadFile(dataFilePath)
+	data, err := os.ReadFile(dataFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read data from JSON file: %v", err)
 	}
@@ -36,18 +41,30 @@ func NewCustomerUseCase(dataFilePath string) (CustomerUseCase, error) {
 	}, nil
 }
 
-func (uc *customerUseCase) Register(name, email, password string) error {
+func (uc *customerUseCase) Register(payload req.RegisterRequest) error {
+	// Validate the payload
+	validate := validator.New()
+	err := validate.Struct(payload)
+	if err != nil {
+		return err
+	}
+
+	// hash password
+	hashPassword, err := security.HashPassword(payload.Password)
+	if err != nil {
+		return err
+	}
 	// Create a new customer with a unique ID
 	newCustomer := &model.Customer{
-		ID:       len(uc.Customers) + 1, // You can use a more robust ID generation method
-		Name:     name,
-		Email:    email,
-		Password: password,
+		ID:       common.GenerateID(),
+		Name:     payload.Name,
+		Email:    payload.Email,
+		Password: hashPassword,
 	}
 
 	// Check if the email is already registered
 	for _, customer := range uc.Customers {
-		if customer.Email == email {
+		if customer.Email == payload.Email {
 			return fmt.Errorf("email is already registered")
 		}
 	}
@@ -73,7 +90,7 @@ func (uc *customerUseCase) saveCustomerDataToFile() error {
 		return fmt.Errorf("failed to marshal customer data: %v", err)
 	}
 
-	err = ioutil.WriteFile(uc.dataFilePath, data, 0644)
+	err = os.WriteFile(uc.dataFilePath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write customer data to file: %v", err)
 	}
@@ -81,11 +98,48 @@ func (uc *customerUseCase) saveCustomerDataToFile() error {
 	return nil
 }
 
-func (uc *customerUseCase) Login(email, password string) error {
-	// Implement login logic here
-	// Check if the email and password match any customer's credentials
+func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
+	// Validate the payload
+	validate := validator.New()
+	err := validate.Struct(payload)
+	if err != nil {
+		return "", err
+	}
 
-	return nil
+	var identifier string
+
+	if payload.Identifier.Name != "" {
+		identifier = payload.Identifier.Name
+	} else if payload.Identifier.Email != "" {
+		identifier = payload.Identifier.Email
+	}
+
+	if identifier == "" {
+		return "", errors.New("unauthorized: Invalid credential")
+	}
+
+	// Cari customer yang sesuai dengan email atau nama
+	var matchedCustomer *model.Customer
+	for _, customer := range uc.Customers {
+		if customer.Email == payload.Identifier.Email || customer.Name == payload.Identifier.Name {
+			matchedCustomer = customer
+			break
+		}
+	}
+
+	// Validasi Password
+	err = security.VerifyPassword(matchedCustomer.Password, payload.Password)
+	if err != nil {
+		return "error nih boss B", fmt.Errorf("unauthorized: invalid credential")
+	}
+
+	// Generate Token
+	token, err := security.GenerateJWTToken(matchedCustomer)
+	if err != nil {
+		return "error nih boss C", err
+	}
+
+	return token, nil
 }
 
 func (uc *customerUseCase) Logout() error {

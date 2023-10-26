@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"EkoEdyPurwanto/mnc-bank/model/req"
 	"EkoEdyPurwanto/mnc-bank/usecase"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -27,18 +28,14 @@ func (c *CustomerDelivery) AuthRoute() {
 }
 
 func (c *CustomerDelivery) registerHandler(ctx echo.Context) error {
-	// Parse the request body to get registration data
-	var registrationData struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-	if err := ctx.Bind(&registrationData); err != nil {
+	// Parse the request body to get payload from dto
+	var payload req.RegisterRequest
+	if err := ctx.Bind(&payload); err != nil {
 		return ctx.JSON(http.StatusBadRequest, "Invalid request body")
 	}
 
 	// Call the Register method from the use case layer
-	if err := c.customerUC.Register(registrationData.Name, registrationData.Email, registrationData.Password); err != nil {
+	if err := c.customerUC.Register(payload); err != nil {
 		return ctx.JSON(http.StatusConflict, err.Error())
 	}
 
