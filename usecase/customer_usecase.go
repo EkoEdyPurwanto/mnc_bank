@@ -64,7 +64,11 @@ func (uc *customerUseCase) Register(name, email, password string) error {
 }
 
 func (uc *customerUseCase) saveCustomerDataToFile() error {
-	data, err := json.Marshal(uc.Customers)
+	customerData := model.CustomerData{
+		Customers: uc.Customers,
+	}
+
+	data, err := json.MarshalIndent(customerData, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal customer data: %v", err)
 	}
