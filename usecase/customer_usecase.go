@@ -130,13 +130,13 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 	// Validasi Password
 	err = security.VerifyPassword(matchedCustomer.Password, payload.Password)
 	if err != nil {
-		return "error nih boss B", fmt.Errorf("unauthorized: invalid credential")
+		return "", fmt.Errorf("unauthorized: invalid credential")
 	}
 
 	// Generate Token
 	token, err := security.GenerateJWTToken(matchedCustomer)
 	if err != nil {
-		return "error nih boss C", err
+		return "", err
 	}
 
 	return token, nil

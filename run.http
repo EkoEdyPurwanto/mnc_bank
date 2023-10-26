@@ -18,9 +18,8 @@ Content-Type: application/json
 
 {
   "Identifier": {
-    "UserName": "testuser",
-    "Email": "test@example.com",
-    "PhoneNumber": "1234567890"
+    "Name": "user",
+    "Email": "user@example.com"
   },
   "Password": "password123"
 }

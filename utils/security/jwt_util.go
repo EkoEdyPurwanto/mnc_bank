@@ -12,11 +12,10 @@ func GenerateJWTToken(customer *model.Customer) (string, error) {
 
 	// Set the claims (payload) for the token
 	claims := token.Claims.(jwt.MapClaims)
-	claims["customerID"] = customer.ID
-	// You can add more claims as needed
+	claims["ID"] = customer.ID
 
 	// Sign the token with a secret key
-	secretKey := []byte("your-secret-key") // Replace with your secret key
+	secretKey := []byte("rhs") // Replace with your secret key
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err
