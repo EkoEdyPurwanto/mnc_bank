@@ -2,6 +2,7 @@ package main
 
 import (
 	"EkoEdyPurwanto/mnc-bank/delivery"
+	"EkoEdyPurwanto/mnc-bank/model"
 	"EkoEdyPurwanto/mnc-bank/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -10,10 +11,8 @@ import (
 
 func main() {
 	e := echo.New()
-	customerUC, err := usecase.NewCustomerUseCase("../repository/customer.json")
-	if err != nil {
-		log.Fatal(err)
-	}
+	var cus []*model.Customer
+	customerUC := usecase.NewCustomerUseCase(cus)
 
 	// Use middleware for logging and CORS (Cross-Origin Resource Sharing)
 	e.Use(middleware.Logger())
