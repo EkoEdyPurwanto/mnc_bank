@@ -20,25 +20,13 @@ type CustomerUseCase interface {
 }
 
 type customerUseCase struct {
-	Customers    []*model.Customer
-	dataFilePath string
+	customers []*model.Customer
 }
 
-func NewCustomerUseCase(dataFilePath string) (CustomerUseCase, error) {
-	data, err := os.ReadFile(dataFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read data from JSON file: %v", err)
-	}
-
-	var customerData model.CustomerData
-	if err := json.Unmarshal(data, &customerData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON data: %v", err)
-	}
-
+func NewCustomerUseCase(customers []*model.Customer) CustomerUseCase {
 	return &customerUseCase{
-		Customers:    customerData.Customers,
-		dataFilePath: dataFilePath,
-	}, nil
+		customers: customers,
+	}
 }
 
 func (uc *customerUseCase) Register(payload req.RegisterRequest) error {
@@ -62,15 +50,21 @@ func (uc *customerUseCase) Register(payload req.RegisterRequest) error {
 		Password: hashPassword,
 	}
 
+	// Baca data pelanggan dari file JSON
+	pelanggan, err := uc.loadCustomerDataFromFile()
+	if err != nil {
+		return err
+	}
+
 	// Check if the email is already registered
-	for _, customer := range uc.Customers {
+	for _, customer := range pelanggan {
 		if customer.Email == payload.Email {
 			return fmt.Errorf("email is already registered")
 		}
 	}
 
 	// Append the new customer to the list of customers
-	uc.Customers = append(uc.Customers, newCustomer)
+	uc.customers = append(uc.customers, newCustomer)
 
 	// Save the updated customer data to the JSON file
 	if err := uc.saveCustomerDataToFile(); err != nil {
@@ -82,7 +76,7 @@ func (uc *customerUseCase) Register(payload req.RegisterRequest) error {
 
 func (uc *customerUseCase) saveCustomerDataToFile() error {
 	customerData := model.CustomerData{
-		Customers: uc.Customers,
+		Customers: uc.customers,
 	}
 
 	data, err := json.MarshalIndent(customerData, "", "  ")
@@ -90,7 +84,7 @@ func (uc *customerUseCase) saveCustomerDataToFile() error {
 		return fmt.Errorf("failed to marshal customer data: %v", err)
 	}
 
-	err = os.WriteFile(uc.dataFilePath, data, 0644)
+	err = os.WriteFile("../repository/customer.json", data, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write customer data to file: %v", err)
 	}
@@ -118,13 +112,23 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 		return "", errors.New("unauthorized: Invalid credential")
 	}
 
+	// Baca data pelanggan dari file JSON
+	pelanggan, err := uc.loadCustomerDataFromFile()
+	if err != nil {
+		return "", err
+	}
+
 	// Cari customer yang sesuai dengan email atau nama
 	var matchedCustomer *model.Customer
-	for _, customer := range uc.Customers {
+	for _, customer := range pelanggan {
 		if customer.Email == payload.Identifier.Email || customer.Name == payload.Identifier.Name {
 			matchedCustomer = customer
 			break
 		}
+	}
+
+	if matchedCustomer == nil {
+		return "", errors.New("unauthorized: Customer not found")
 	}
 
 	// Validasi Password
@@ -142,6 +146,20 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 	// Save the token data to the JSON file yang sudah terbuat tadi,
 
 	return token, nil
+}
+
+func (uc *customerUseCase) loadCustomerDataFromFile() ([]*model.Customer, error) {
+	data, err := os.ReadFile("../repository/customer.json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read customer data from file: %v", err)
+	}
+
+	var customerData model.CustomerData
+	if err := json.Unmarshal(data, &customerData); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON data: %v", err)
+	}
+
+	return customerData.Customers, nil
 }
 
 func (uc *customerUseCase) Logout() error {
