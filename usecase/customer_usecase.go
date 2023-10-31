@@ -3,13 +3,12 @@ package usecase
 import (
 	"EkoEdyPurwanto/mnc-bank/model"
 	"EkoEdyPurwanto/mnc-bank/model/req"
+	"EkoEdyPurwanto/mnc-bank/repository"
 	"EkoEdyPurwanto/mnc-bank/utils/common"
 	"EkoEdyPurwanto/mnc-bank/utils/security"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"os"
 )
 
 type CustomerUseCase interface {
@@ -20,12 +19,12 @@ type CustomerUseCase interface {
 }
 
 type customerUseCase struct {
-	customers []*model.Customer
+	repo repository.CustomerRepository
 }
 
-func NewCustomerUseCase(customers []*model.Customer) CustomerUseCase {
+func NewCustomerUseCase(repo repository.CustomerRepository) CustomerUseCase {
 	return &customerUseCase{
-		customers: customers,
+		repo: repo,
 	}
 }
 
@@ -51,42 +50,24 @@ func (uc *customerUseCase) Register(payload req.RegisterRequest) error {
 	}
 
 	// Baca data pelanggan dari file JSON
-	pelanggan, err := uc.loadCustomerDataFromFile()
+	customers, err := uc.repo.Load()
 	if err != nil {
 		return err
 	}
 
 	// Check if the email is already registered
-	for _, customer := range pelanggan {
-		if customer.Email == payload.Email {
-			return fmt.Errorf("email is already registered")
+	for _, customer := range customers {
+		if customer.Email == newCustomer.Email {
+			return errors.New("email is already registered")
 		}
 	}
 
 	// Append the new customer to the list of customers
-	uc.customers = append(uc.customers, newCustomer)
+	customers = append(customers, newCustomer)
 
 	// Save the updated customer data to the JSON file
-	if err := uc.saveCustomerDataToFile(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (uc *customerUseCase) saveCustomerDataToFile() error {
-	customerData := model.CustomerData{
-		Customers: uc.customers,
-	}
-
-	data, err := json.MarshalIndent(customerData, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal customer data: %v", err)
-	}
-
-	err = os.WriteFile("../repository/customer.json", data, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write customer data to file: %v", err)
+	if err := uc.repo.Save(customers); err != nil {
+		return fmt.Errorf("failed to save customer data: %v", err)
 	}
 
 	return nil
@@ -113,14 +94,14 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 	}
 
 	// Baca data pelanggan dari file JSON
-	pelanggan, err := uc.loadCustomerDataFromFile()
+	customers, err := uc.repo.Load()
 	if err != nil {
 		return "", err
 	}
 
 	// Cari customer yang sesuai dengan email atau nama
 	var matchedCustomer *model.Customer
-	for _, customer := range pelanggan {
+	for _, customer := range customers {
 		if customer.Email == payload.Identifier.Email || customer.Name == payload.Identifier.Name {
 			matchedCustomer = customer
 			break
@@ -146,20 +127,6 @@ func (uc *customerUseCase) Login(payload req.LoginRequest) (string, error) {
 	// Save the token data to the JSON file yang sudah terbuat tadi,
 
 	return token, nil
-}
-
-func (uc *customerUseCase) loadCustomerDataFromFile() ([]*model.Customer, error) {
-	data, err := os.ReadFile("../repository/customer.json")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read customer data from file: %v", err)
-	}
-
-	var customerData model.CustomerData
-	if err := json.Unmarshal(data, &customerData); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON data: %v", err)
-	}
-
-	return customerData.Customers, nil
 }
 
 func (uc *customerUseCase) Logout() error {

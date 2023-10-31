@@ -11,6 +11,12 @@
       "name": "user",
       "email": "userXX@example.com",
       "password": "$2a$10$BW/9Sv3mJdqafBeCtK7DZOip7SZa7b5C228ANcRz2wiGkB8xZEJbO"
+    },
+    {
+      "id": "7952a39b-da42-4c97-8d95-2b1282cddc7d",
+      "name": "user",
+      "email": "user@example.com",
+      "password": "$2a$10$urEg9HwddYAPvA7htVnriua.4F4PIdHpzEHeSdrRRRG0ex1jzz.N."
     }
   ]
 }
